@@ -1,0 +1,6 @@
+<network>
+  <name>vt_vnet_0</name>
+  <bridge name='vtbr0' stp='on'/>
+  <mac address='52:54:00:60:f8:6f'/>
+  <ip address='192.168.0.1' netmask='255.255.255.0'/>
+</network>

@@ -1,0 +1,45 @@
+<domain type='kvm'>
+  <name>controller-2</name>
+  <os>
+    <type arch='x86_64'>hvm</type>
+    <boot dev='network'/>
+    <boot dev='hd'/>
+  </os>
+  <vcpu>1</vcpu>
+  <memory unit='MB'>8192</memory>
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <clock offset="utc"/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <emulator>/usr/libexec/qemu-kvm</emulator>
+    <disk type='file' device='disk'>
+      <source file='/root/virt_trinity/controller-1.qcow2'/>
+      <driver name='qemu' type='qcow2' cache='writeback'/>
+      <target dev='vda' bus='virtio'/>
+    </disk>
+    <interface type='network'>
+      <source network='vt_vnet_0'/>
+      <mac address='52:54:00:9c:95:4a'/>
+      <model type='virtio'/>
+    </interface>
+    <interface type='network'>
+      <source network='vt_vnet_1'/>
+      <mac address='52:54:00:9c:95:4b'/>
+      <model type='virtio'/>
+    </interface>
+    <interface type='network'>
+      <source network='vt_vnet_2'/>
+      <mac address='52:54:00:9c:95:4c'/>
+      <model type='virtio'/>
+    </interface>
+    <graphics type='vnc' port='-1'/>
+    <console type='pty'/>
+    <sound model='ac97'/>
+  </devices>
+</domain>
