@@ -4,7 +4,7 @@ Quick start guide
 
 We will be setting up a small cluster using virtual machines as described in the following diagram
 
-.. image:: file:///home/hicham/Documents/simple_arch_net.png
+.. image:: http://10.2.2.21:8080/misc/quickstart/raw/master/cluster.png
 
 ----------------------------
 Virtual machines preparation
