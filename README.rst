@@ -164,11 +164,11 @@ Controllers setup
 
 - Boot up the first controller::
 
-    ~# rpower node001 on
+    ~# rpower vt_controller_1 on
 
 - After an hour or so, boot up the second controller::
 
-    ~# rpower node002 on
+    ~# rpower vt_controller_2 on
 
 
 -----------------------
