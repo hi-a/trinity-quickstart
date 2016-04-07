@@ -44,10 +44,12 @@ System preparation
 
 - Install required repositories and tools::
 
-    ~# rpm -ivh https://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
-    ~# rpm -ivh https://repos.fedorapeople.org/repos/openstack/openstack-juno/rdo-release-juno-1.noarch.rpm
-    ~# rpm -ivh https://sourceforge.net/projects/xcat/files/yum/2.10/xcat-core/xCAT-core.repo
-    ~# rpm -ivh https://sourceforge.net/projects/xcat/files/yum/xcat-dep/rh7/x86_64/xCAT-dep.repo
+    ~# rpm -Uvh https://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+    ~# rpm -Uvh https://repos.fedorapeople.org/repos/openstack/openstack-juno/rdo-release-juno-1.noarch.rpm
+    ~# rpm -Uvh https://sourceforge.net/projects/xcat/files/yum/2.10/xcat-core/xCAT-core.repo
+    ~# rpm -Uvh https://sourceforge.net/projects/xcat/files/yum/xcat-dep/rh7/x86_64/xCAT-dep.repo
+    ~# rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+    ~# rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
     ~# yum install -y yum-utils createrepo docker docker-registry xCAT
 
 - Enable NAT in iptables::
@@ -231,7 +233,7 @@ Controller
 - cxx nodes are not automatically added to xcat db
 - trinity-api dashboard needs to be restarted in order to reflect current xcat db
 - had to restart pacemaker cluster on the ctrl2 before it could run properly
-- if using xCAT 2.11+ trinity api needs to be updated (/usr/lib/python2.7/site-packages/trinity_api/api.py:966) password=>userPW
+- if using xCAT 2.10+ trinity api needs to be updated (/usr/lib/python2.7/site-packages/trinity_api/api.py:966) password=>userPW
 - https://github.com/clustervision/trinity/blob/r8/controller/rootimg/install/postscripts/cv_ha_sentinel#L17 Error: Unable to find constraint - 'location-ip-controller-1.cluster-50'
 
 Login
