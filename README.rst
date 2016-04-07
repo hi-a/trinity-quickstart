@@ -147,14 +147,14 @@ Trinity setup
 
     ~# virt-edit -a /trinity/qcows/login.qcow2 /boot/grub2/grub.cfg
 
-- Download CentOS everything image::
+- Download CentOS DVD image::
 
     ~# mkdir /trinity/iso
-    ~# wget http://mirror.amsiohosting.net/centos.org/7/isos/x86_64/CentOS-7-x86_64-Everything-1511.iso -P /trinity/iso
+    ~# wget http://mirror.amsiohosting.net/centos.org/7/isos/x86_64/CentOS-7-x86_64-DVD-1511.iso -P /trinity/iso
 
 - Create initial centos repositories::
 
-    ~# copycds -n centos7 -o /trinity/iso/CentOS-7-x86_64-Everything-1511.iso
+    ~# copycds -n centos7 -o /trinity/iso/CentOS-7-x86_64-DVD-1511.iso
 
 Controllers setup
 =================
