@@ -46,11 +46,9 @@ System preparation
 
     ~# rpm -ivh https://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
     ~# rpm -ivh https://repos.fedorapeople.org/repos/openstack/openstack-juno/rdo-release-juno-1.noarch.rpm
-    ~# yum install -y yum-utils createrepo docker docker-registry
-
-- Install xcat::
-
-    http://www.4gh.net/hints/xcat/basic-install.html
+    ~# rpm -ivh https://sourceforge.net/projects/xcat/files/yum/2.10/xcat-core/xCAT-core.repo
+    ~# rpm -ivh https://sourceforge.net/projects/xcat/files/yum/xcat-dep/rh7/x86_64/xCAT-dep.repo
+    ~# yum install -y yum-utils createrepo docker docker-registry xCAT
 
 - Enable NAT in iptables::
 
@@ -66,7 +64,13 @@ System preparation
 xCAT setup
 ==========
 
+- Add xCAT commands to the execution path::
+
+    ~# source /etc/profile.d/xcat.sh
+
 - Update the following key values on the site table::
+
+    ~# tabedit site
 
     "master","192.168.0.254",,
     "forwarders","8.8.8.8,8.8.4.4",,
@@ -76,7 +80,7 @@ xCAT setup
     "timezone","Europe/Amsterdam",,
 
 - Add master, kvmhost and VM nodes to xcat tables (https://sourceforge.net/p/xcat/wiki/XCAT_Virtualization_with_KVM/)
-- Update xcat tables using the files in *./trinity/master/tables/*::
+- Update osimage and linuximage tables using the files in *./trinity/master/tables/*::
 
     ~# tabrestore ./trinity/master/tables/osimage
     ~# tabrestore ./trinity/master/tables/linuximage
@@ -92,11 +96,10 @@ xCAT setup
 Trinity setup
 =============
 
-- Clone trinity::
+- Clone trinity and checkout latest release::
 
     ~# git clone https://github.com/clustervision/trinity
-
-- Download CentOS everything image
+    ~# git checkout r8
 
 - Update the kickstart template used to configure the controllers and adjust LVM sizes and disk names::
 
@@ -117,9 +120,14 @@ Trinity setup
 
     ~# ./trinity/update.sh master
 
-- Create the repositories that'll be used to setup the controller nodes (otherwise scp from working master)::
+- Create the repositories that'll be used to setup the controller nodes::
 
-    ~# ./master/create_repo_snapshot.sh
+    ~# cat ./controller/rootimg/install/custom/install/centos/*pkg* ./controller/rootimg/install/custom/netboot/centos/*pkg* | grep -v ^# | grep -v ^$ | grep ^@ | sort -u > /tmp/pkglist
+    ~# cat ./controller/rootimg/install/custom/install/centos/*pkg* ./controller/rootimg/install/custom/netboot/centos/*pkg* | grep ^@ | sort -u > /tmp/grplist
+    ~# mkdir -p /install/post/otherpkgs/centos7/x86_64/Packages
+    ~# cat /tmp/pkglist | xargs repotrack -p /install/post/otherpkgs/centos7/x86_64/Packages
+    ~# cat /tmp/grplist | xargs repoquery --qf=%{name} -g --list --grouppkgs=all | xargs repotrack -p /install/post/otherpkgs/centos7/x86_64/Packages
+    ~# createrepo /install/post/otherpkgs/centos7/x86_64/Packages
 
 - Build docker images::
 
@@ -137,16 +145,22 @@ Trinity setup
 
     ~# virt-edit -a /trinity/qcows/login.qcow2 /boot/grub2/grub.cfg
 
-- Move the CentOS everything iso file to */trinity/iso/*
+- Download CentOS everything image::
 
+    ~# mkdir /trinity/iso
+    ~# wget http://mirror.amsiohosting.net/centos.org/7/isos/x86_64/CentOS-7-x86_64-Everything-1511.iso -P /trinity/iso
+
+- Create initial centos repositories::
+
+    ~# copycds -n centos7 -o /trinity/iso/CentOS-7-x86_64-Everything-1511.iso
 
 Controllers setup
 =================
 
 - Assign the active and passive images to the first and second controllers respectively::
 
-    ~# nodeset ha_ctrl1 osimage=centos7-x86_64-install-controller-active
-    ~# nodeset ha_ctrl2 osimage=centos7-x86_64-install-controller-passive
+    ~# nodeset vt_controller_1 osimage=centos7-x86_64-install-controller-active
+    ~# nodeset vt_controller_2 osimage=centos7-x86_64-install-controller-passive
 
 - Boot up the first controller::
 
@@ -164,16 +178,35 @@ On the main controller:
 - To be able to access the dashboard on *http://localhost* we can double tunnel in::
 
     local# ssh -L 80:localhost:8089 root@kvmhost
-    kvmhost# ssh -L 8089:localhost:80 root@ha_ctrl1
+    kvmhost# ssh -L 8089:localhost:80 root@vt_controller_1
 
-- Add compute nodes in xcat tables (mac, nodehm, hosts, hwinv, nodelist, vm)
-- ** mkdef -t group -o hw-default,vc-a
-- ** nodeadd c1-cx groups=hw-default
+- Add compute nodes in xcat tables (hosts, mac, nodehm, hwinv, nodelist, vm)
 - ** add cpuinfo to hwinv table for compute nodes
-- ** update /etc/trinity/trinity_api.conf to reflect the correct node_prefix (ha_compute)
-- ** build first vc (nova network; nova boot; floatingip attach)
-- nodeset computes the correct osimage
-- rpower on the computes
+- Add a new default group that will hold container members that we'll create in the next step::
+
+   ~# mkdef -t group -o hw-default
+
+- Add container definitions to xcat tables for trinity to be able to manage cluster partitions::
+
+   ~# nodeadd c1-cx groups=hw-default
+
+- Update trinity's config file */etc/trinity/trinity_api.conf* to reflect the correct node prefix if using a prefix other than *node* (vt_compute)
+- Setup name resolution and dhcp configuration::
+
+    ~# makehosts -n
+    ~# makedns -n
+    ~# makedhcp -n
+    ~# systemctl restart dhcpd
+    ~# rndc reload
+
+- Assign the trinity netboot image to the compute nodes::
+
+    ~# nodeset compute osimage=centos7-x86_64-netboot-trinity
+
+- Boot up the compute nodes::
+
+    ~# rpower compute on
+
 
 ---------------
 Troubleshooting
@@ -183,12 +216,10 @@ Troubleshooting
 
 Master
 ======
-- update trinity dockerfile (entrypoint fails!!)
+- update script needs to clean up any existing packages
 - sysconfig/docker has wrong registry address ???
 - missing file /opt/xcat/share/xcat/install/scripts/pre.rh.rhel7 (has something to do with the xcat version i'm using)
 - /trinity \*(rw,sync,no_root_squash,no_all_squash) must be appended to /etc/exports
-- docker images on the master need to be retagged (most probably not!!)
-- chdef ha_ctrl1 addkcmdline="selinux=0" ???
 - ./otherpkgs: line 891: /usr/bin/logger: Argument list too long (had to comment out the line)
 - No need for the ‘/rh/dracut_033’ symlinks in cv_install_controller, they already exist
 - we need to be able to re-run postscripts without having to reset a node
@@ -199,18 +230,16 @@ Controller
 - make sure the cv_configure_storage refers to the correct disks
 - cxx nodes are not automatically added to xcat db
 - trinity-api dashboard needs to be restarted in order to reflect current xcat db
-- nova network is not created at first (ERROR)
 - had to restart pacemaker cluster on the ctrl2 before it could run properly
-- when started, the second controller takes over the cluster resources
 - if using xCAT 2.11+ trinity api needs to be updated (/usr/lib/python2.7/site-packages/trinity_api/api.py:966) password=>userPW
+- https://github.com/clustervision/trinity/blob/r8/controller/rootimg/install/postscripts/cv_ha_sentinel#L17 Error: Unable to find constraint - 'location-ip-controller-1.cluster-50'
 
 Login
 =====
-- slurmctld fails to start if the directory /cluster/var/slurm is missing (mkdir & restart slurm)
 - slurm must be restarted when nodes are added or removed from a partition
 
 Compute
 =======
-- edit /usr/sbin/trinity-start:6 to reflect the correct node prefix if using something other than *node*
-
+- edit /usr/sbin/trinity-start:6 to reflect the correct node prefix if using something other than *node* (vt_compute)
+- when reset, the compute nodes fail load docker daemon. docker pool has different UUID and disks are not reformated.
 
