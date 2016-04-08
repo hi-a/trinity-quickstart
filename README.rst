@@ -145,6 +145,11 @@ Trinity setup
 
     ~# (cd trinity/ && ./update master)
 
+- Export */trinity* as an NFS mount::
+
+    ~# echo "/trinity *(rw,sync,no_root_squash,no_all_squash)" >> /etc/exports
+    ~# exportfs -a
+
 - Create the repositories that'll be used to setup the controller nodes::
 
     ~# cat ./trinity/controller/rootimg/install/custom/install/centos/*pkg* ./trinity/controller/rootimg/install/custom/netboot/centos/*pkg* | grep -v ^# | grep -v ^$ | grep -v ^@ | sort -u > /tmp/pkglist
@@ -244,9 +249,8 @@ Troubleshooting
 Master
 ======
 - update script needs to clean up any existing packages
-- sysconfig/docker has wrong registry address ???
+- sysconfig/docker has wrong registry address
 - missing file /opt/xcat/share/xcat/install/scripts/pre.rh.rhel7 (has something to do with the xcat version i'm using)
-- /trinity \*(rw,sync,no_root_squash,no_all_squash) must be appended to /etc/exports && exportfs -a
 - ./otherpkgs: line 891: /usr/bin/logger: Argument list too long (had to comment out the line)
 - No need for the ‘/rh/dracut_033’ symlinks in cv_install_controller, they already exist
 - we need to be able to re-run postscripts without having to reset a node
@@ -267,6 +271,6 @@ Login
 
 Compute
 =======
-- edit /usr/sbin/trinity-start:6 to reflect the correct node prefix if using something other than *node* (vt_compute)
-- when reset, the compute nodes fail load docker daemon. docker pool has different UUID and disks are not reformated.
+- edit /usr/sbin/trinity-start:6 to reflect the correct node prefix if using something other than *node*
+- when reset, the compute nodes fail to load docker daemon. docker pool has different UUID and disks are not reformated.
 
