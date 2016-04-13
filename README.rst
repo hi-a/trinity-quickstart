@@ -103,8 +103,6 @@ xCAT setup
     "xcatiport","3002",,
     "dhcplease","43200",,
 
-- Add master, kvmhost and VM nodes to xcat tables::
-    site, hosts, mac, vm, nodelist, noderes, nodehm, passwd, postscripts
 - Setup name resolution and dhcp configuration::
 
     ~# makehosts -n
@@ -120,6 +118,12 @@ Trinity setup
 
     ~# git clone https://github.com/clustervision/trinity
     ~# (cd trinity && git checkout r8)
+
+- Add master, kvmhost and VM nodes to xcat tables::
+
+    hosts, mac, vm, nodelist, noderes, nodehm, passwd
+
+    ~# tabrestore ./trinity/master/tables/postscripts.csv
 
 - Update osimage and linuximage tables using the files in *./trinity/master/tables/*::
 
@@ -210,7 +214,7 @@ On the main controller:
 - To be able to access the dashboard on *http://localhost* we can double tunnel in::
 
     local# ssh -L 80:localhost:8089 root@kvmhost
-    kvmhost# ssh -L 8089:localhost:80 root@vt_controller_1
+    kvmhost# ssh -L 8089:localhost:80 root@controller-1
 
 - Add compute nodes in xcat tables (hosts, mac, nodehm, hwinv, nodelist, vm)
 - ** add cpuinfo to hwinv table for compute nodes
@@ -220,9 +224,10 @@ On the main controller:
 
 - Add container definitions to xcat tables for trinity to be able to manage cluster partitions::
 
-   ~# nodeadd c1-cx groups=hw-default
+   ~# nodeadd c001 groups=hw-default
+   ~# nodeadd c002 groups=hw-default
 
-- Update trinity's config file */etc/trinity/trinity_api.conf* to reflect the correct node prefix if using a prefix other than *node* (vt_compute)
+- Update trinity's config file */etc/trinity/trinity_api.conf* to reflect the correct node prefix if using a prefix other than *node*
 - Setup name resolution and dhcp configuration::
 
     ~# makehosts -n
