@@ -44,7 +44,24 @@ System preparation
 
 - Configure hostname and networking::
 
-    ~#
+    ~# cat /etc/sysconfig/network-scripts/ifcfg-eth0 
+
+    NAME="eth0"
+    ONBOOT=yes
+    NETBOOT=yes
+    BOOTPROTO=dhcp
+    TYPE=Ethernet
+    DEFROUTE=yes
+
+    ~# cat /etc/sysconfig/network-scripts/ifcfg-eth1
+    
+    NAME="eth1"
+    ONBOOT=yes
+    NETBOOT=yes
+    BOOTPROTO=none
+    TYPE=Ethernet
+    NETMASK=255.255.255.0 
+    IPADDR=192.168.1.254
 
 - Install required repositories and tools::
 
@@ -91,9 +108,9 @@ xCAT setup
 
     ~# tabedit site
 
-    "master","192.168.0.254",,
+    "master","192.168.1.254",,
     "forwarders","8.8.8.8,8.8.4.4",,
-    "nameservers","192.168.0.254",,
+    "nameservers","192.168.1.254",,
     "domain","kvm-cluster",,
     "dhcpinterfaces","eth1",,
     "timezone","Europe/Amsterdam",,
@@ -254,7 +271,6 @@ Troubleshooting
 Master
 ======
 - update script needs to clean up any existing packages
-- sysconfig/docker has wrong registry address
 - missing file /opt/xcat/share/xcat/install/scripts/pre.rh.rhel7 (has something to do with the xcat version i'm using)
 - ./otherpkgs: line 891: /usr/bin/logger: Argument list too long (had to comment out the line)
 - No need for the ‘/rh/dracut_033’ symlinks in cv_install_controller, they already exist
