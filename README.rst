@@ -138,8 +138,42 @@ Trinity setup
 
 - Add master, kvmhost and VM nodes to xcat tables::
 
-    hosts, mac, vm, nodelist, noderes, nodehm, passwd
+    ~# tabedit hosts
+    
+    "master","192.168.1.254","master master.kvm-cluster",,,
+    "kvmhost","<kvm_host_ip_addr>",,,,
+    "controller-1","192.168.1.2","controller-1",,,
+    "controller-2","192.168.1.3","controller-2",,,
 
+    ~# tabedit mac
+    
+    "controller-1",,"52:54:00:9c:94:4a",,
+    "controller-2",,"52:54:00:9c:95:4a",,
+
+    ~# tabedit nodelist
+    
+    "master","all",,,,,,,,,,,
+    "kvmhost","all",,,,,,,,,,,
+    "controller-1","controller,vm,all",,,,,,,,,,,
+    "controller-2","controller,vm,all",,,,,,,,,,,
+
+    ~# tabedit vm
+    
+    "controller",,"kvmhost",,,,,,,,,,,,,,,,,,,,,,,,,,,,
+    
+    ~# tabedit noderes
+    
+    "controller",,"xnba",,,,,,,"mac",,,,,,,,,,,
+    
+    ~# tabedit nodehm
+    
+    "controller",,"kvm",,,,,"0","115200",,,,,,
+    
+    ~# tabedit passwd
+    
+    "omapi","xcat_key","bnZmaGlnbjJRMXNLQnNtQTh6N0VmQmhtWEc2eHlkdXA=",,,,
+    "system","root","<PASSWORD>",,,,
+    
     ~# tabrestore ./trinity/master/tables/postscripts.csv
 
 - Update osimage and linuximage tables using the files in *./trinity/master/tables/*::
