@@ -65,7 +65,7 @@ System preparation
 
 - Install required repositories and tools::
 
-    ~# rpm -Uvh https://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+    ~# rpm -Uvh https://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-6.noarch.rpm
     ~# rpm -Uvh https://repos.fedorapeople.org/repos/openstack/openstack-juno/rdo-release-juno-1.noarch.rpm
     ~# rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
     ~# rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
