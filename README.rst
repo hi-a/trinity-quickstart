@@ -185,9 +185,9 @@ Trinity setup
 
     ~# cat ./trinity/controller/rootimg/install/custom/install/centos/controller.partitions
 
-     part /boot --size 256 --fstype ext4 --ondisk /dev/sda
-     part swap --recommended --ondisk /dev/sda
-     part pv.01 --size 1 --grow --ondisk /dev/sda
+     part /boot --size 256 --fstype ext4 --ondisk /dev/vda
+     part swap --recommended --ondisk /dev/vda
+     part pv.01 --size 1 --grow --ondisk /dev/vda
      volgroup vg_root pv.01
      logvol / --vgname=vg_root --name=lv_root --size 25000 --fstype ext4
      logvol  /drbd  --vgname=vg_root --name=lv_drbd --size=22000
