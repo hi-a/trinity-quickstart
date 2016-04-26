@@ -46,7 +46,7 @@ System preparation
 
     ~# cat /etc/sysconfig/network-scripts/ifcfg-eth0 
 
-    NAME="eth0"
+    DEVICE="eth0"
     ONBOOT=yes
     NETBOOT=yes
     BOOTPROTO=dhcp
@@ -55,7 +55,7 @@ System preparation
 
     ~# cat /etc/sysconfig/network-scripts/ifcfg-eth1
     
-    NAME="eth1"
+    DEVICE="eth1"
     ONBOOT=yes
     NETBOOT=yes
     BOOTPROTO=none
@@ -67,6 +67,7 @@ System preparation
 
     ~# rpm -Uvh https://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-6.noarch.rpm
     ~# rpm -Uvh https://repos.fedorapeople.org/repos/openstack/EOL/openstack-juno/rdo-release-juno-1.noarch.rpm
+    ~# sed -i "/^baseurl/s/openstack-juno/EOL\/openstack-juno/" /etc/yum.repos.d/rdo-release.repo
     ~# rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
     ~# rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
 
@@ -119,14 +120,6 @@ xCAT setup
     "xcatdport","3001",,
     "xcatiport","3002",,
     "dhcplease","43200",,
-
-- Setup name resolution and dhcp configuration::
-
-    ~# makehosts -n
-    ~# makedns -n
-    ~# makedhcp -n
-    ~# systemctl restart dhcpd
-    ~# rndc reload
 
 Trinity setup
 =============
@@ -181,6 +174,14 @@ Trinity setup
     ~# tabrestore ./trinity/master/tables/osimage.csv
     ~# tabrestore ./trinity/master/tables/linuximage.csv
 
+- Setup name resolution and dhcp configuration::
+
+    ~# makehosts -n
+    ~# makedns -n
+    ~# makedhcp -n
+    ~# systemctl restart dhcpd
+    ~# rndc reload
+
 - Update the kickstart template used to configure the controllers and adjust LVM sizes and disk names::
 
     ~# cat ./trinity/controller/rootimg/install/custom/install/centos/controller.partitions
@@ -211,7 +212,7 @@ Trinity setup
     ~# cat ./trinity/controller/rootimg/install/custom/install/centos/*pkg* ./trinity/controller/rootimg/install/custom/netboot/centos/*pkg* | grep ^@ | sort -u > /tmp/grplist
     ~# mkdir -p /install/post/otherpkgs/centos7/x86_64/Packages
     ~# cat /tmp/pkglist | xargs repotrack -p /install/post/otherpkgs/centos7/x86_64/Packages
-    ~# cat /tmp/grplist | xargs yumdownloader --resolve --destdir /install/post/otherpkgs/centos7/x86_64/Packages
+    ~# cat /tmp/grplist | sed 's,@ ,@,' | xargs yumdownloader --resolve --destdir /install/post/otherpkgs/centos7/x86_64/Packages
     ~# createrepo /install/post/otherpkgs/centos7/x86_64/
 
 - Build docker images::
@@ -230,7 +231,7 @@ Trinity setup
 
 - In order for a login instance to boot up in a nested virtualization context add the **no_timer_check** kernel option to the image::
 
-    ~# virt-edit -a /trinity/qcows/login.qcow2 /boot/grub2/grub.cfg
+    ~# LIBGUESTFS_BACKEND=direct virt-edit -a /trinity/qcows/login.qcow2 /boot/grub2/grub.cfg
 
 - Download CentOS DVD image::
 
