@@ -167,9 +167,21 @@ Trinity setup
     "omapi","xcat_key","bnZmaGlnbjJRMXNLQnNtQTh6N0VmQmhtWEc2eHlkdXA=",,,,
     "system","root","<PASSWORD>",,,,
     
+    ~# tabedit networks
+
+    "internal_net","192.168.1.0","255.255.255.0","eth1","<xcatmaster>","192.168.1.254","192.168.1.254",,,,,,,,,,,,
+    "cluster_mgt_net","10.141.0.0","255.255.0.0","eth1",,,,,,,,,,,,,,,
+    "cluster_bmc_net","10.148.0.0","255.255.0.0","eth1",,,,,,,,,,,,,,,
+    "cluster_vm_net","192.168.32.0","255.255.255.0","br100",,,,,,,,,,,,,,,
+
     ~# tabrestore ./trinity/master/tables/postscripts.csv
 
 - Update osimage and linuximage tables using the files in *./trinity/master/tables/*::
+
+    ~# sed -i 's."cv_install."confignics,cv_install.' ./trinity/master/tables/osimage.csv
+
+    ~# chdef controller-1 nicips.eth1="10.141.255.253|10.148.255.253" nicips.br100="192.168.32.1" nicnetworks.br100="cluster_vm_net" nicnetworks.eth1="cluster_mgt_net|cluster_bmc_net" nictypes.eth1="Ethernet" nictypes.eth2="Ethernet" nictypes.br100="Ethernet" niccustomscripts.eth2="configeth eth2" niccustomscripts.br100="cv_configeth_noip br100" nicextraparams.eth2="BRIDGE=br100" nicextraparams.br100="TYPE=Bridge"
+    ~# chdef controller-2 nicips.eth1="10.141.255.252|10.148.255.252" nicips.br100="192.168.32.1" nicnetworks.br100="cluster_vm_net" nicnetworks.eth1="cluster_mgt_net|cluster_bmc_net" nictypes.eth1="Ethernet" nictypes.eth2="Ethernet" nictypes.br100="Ethernet" niccustomscripts.eth2="configeth eth2" niccustomscripts.br100="cv_configeth_noip br100" nicextraparams.eth2="BRIDGE=br100" nicextraparams.br100="TYPE=Bridge"
 
     ~# tabrestore ./trinity/master/tables/osimage.csv
     ~# tabrestore ./trinity/master/tables/linuximage.csv
