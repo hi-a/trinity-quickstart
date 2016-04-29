@@ -73,8 +73,8 @@ System preparation
 
     ~# yum install -y iptables-services ntp wget bash-completion yum-utils createrepo docker docker-registry git
 
-    ~# wget https://sourceforge.net/projects/xcat/files/yum/2.10/xcat-core/xCAT-core.repo -P /etc/yum.repos.d/
-    ~# wget https://sourceforge.net/projects/xcat/files/yum/xcat-dep/rh7/x86_64/xCAT-dep.repo -P /etc/yum.repos.d/
+    ~# wget https://xcat.org/files/xcat/repos/yum/2.11/xcat-core/xCAT-core.repo -P /etc/yum.repos.d/
+    ~# wget https://xcat.org/files/xcat/repos/yum/xcat-dep/rh7/x86_64/xCAT-dep.repo -P /etc/yum.repos.d/
 
     ~# yum install -y xCAT
 
@@ -94,7 +94,7 @@ System preparation
     ~# systemctl enable ntpd
     ~# systemctl start ntpd
 
-- Make sure tyhe master node can ssh to the kvm host without a password
+- Make sure the master node can ssh to the kvm host without a password
 
    
 
@@ -280,8 +280,35 @@ On the main controller:
     local# ssh -L 80:localhost:8089 root@kvmhost
     kvmhost# ssh -L 8089:localhost:80 root@controller-1
 
-- Add compute nodes in xcat tables (hosts, mac, nodehm, hwinv, nodelist, vm)
-- ** add cpuinfo to hwinv table for compute nodes
+- Add compute nodes in xcat tables::
+
+    ~# tabedit hosts
+
+    "kvmhost","<kvmhost_ip_addr>",,,,
+
+    ~# tabedit mac
+
+    "node001",,"52:54:00:9c:94:7a",,
+    "node002",,"52:54:00:9c:94:8a",,
+
+    ~# tabedit nodehm
+
+    "compute",,"kvm",,,,,"0","115200",,,,,,
+
+    ~# tabedit nodelist
+
+    "kvmhost","all",,,,,,,,,,,
+    "node001","compute,vm,all",,,,,,,,,,,
+    "node002","compute,vm,all",,,,,,,,,,,
+
+    ~# tabedit vm
+
+    "compute",,"kvmhost",,,,,,,,,,,,,,,,,,,,,,,,,,,,
+
+    ~# tabedit hwinv
+
+    "compute",,"1",,,,
+
 - Add a new default group that will hold container members that we'll create in the next step::
 
    ~# mkdef -t group -o hw-default
